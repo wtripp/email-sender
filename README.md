@@ -61,7 +61,7 @@ This sample client assumes that the email sender is already running.
     pip install dotenv
     pip install requests
 ```
-3. In the `.env` file, set the `SERVER`, `PORT`, `USERNAME`, and `PASSWORD` environment variables. These correspond to the [Sender Parameters](#email-sender-parameters).
+3. In the `.env` file, set the `SERVER`, `PORT`, `USERNAME`, and `PASSWORD` environment variables. These correspond to the [Sender Parameters](#sender-parameters).
 > **_SECURITY CONSIDERATIONS:_** DO NOT commit this file to any public repos. Store this file locally to keep your email credentials private.
 
 4. In the `test-client.py` file, set the [Sender Parameters](#sender-parameters) and [Optional Parameters](#optional-parameters).
@@ -86,6 +86,15 @@ curl -X POST -H "Content-Type: application/json" -d '{
 ```
 
 ## Receive Data from Microservice
-When you send a request to the email sender microservice, it returns a JSON response indicating whether the email was sent successfully or not.
+When you send a request to the email sender microservice, it automatically returns a JSON response indicating whether the email was sent successfully or not.
 
+If the message was sent successully, the microservice sends back this response:
+```
+{"message":"Email sent successfully.","success":true}
+```
+If this email failed to send, the microservice sends the error that triggered the failure. For example:
+```
+{'message': 'Missing required parameters: subject, body', 'success': False}
+```
 ### UML Sequence Diagram
+![UML sequence diagram of the Email Sender microservice](https://github.com/wtripp/email-sender/blob/master/a8-uml.png?raw=true)
