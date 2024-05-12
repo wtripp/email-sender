@@ -1,14 +1,24 @@
-# Email Sender
-This microservice takes as input a set of email details (sender, recipients, subject, body) and sends the email on behalf of a client. Use this microservice to enable sending emails directly from your application. Email Sender was built with Flask, a Python web application framework.
+# Email Sender Microservice
+The Email Sender microservice takes as input a set of email details (sender, recipients, subject, body) and sends the email on behalf of a client. Use this microservice to enable sending emails directly from your application. Email Sender was built with Flask, a Python web application framework.
+
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#installation-and-setup">Installation and Setup</a></li>
+    <li><a href="#request-data-from-microservice">Request Data from Microservice</a></li>
+    <li><a href="#receive-data-from-microservice">Receive Data from Microservice</a></li>
+    <li><a href="#uml-sequence-diagram">UML Sequence Diagram</a></li>
+  </ol>
+</details>
 
 ## Prerequisites
 * You have Python 3.x installed.
-* You have pip installed. See [installation - pip documentation](https://pip.pypa.io/en/stable/installation/).
-* You have an email address that you want to use to send emails.
+* You have [pip](https://pip.pypa.io/en/stable/installation/) installed.
 
 ## Installation and Setup
 1. Download `email-sender.py` from this repo.
-2. Install the required dependencies.
+2. Install the required dependencies for the microservice.
 ```
 pip install Flask
 pip install flask-mail
@@ -30,41 +40,47 @@ _\* Running on http://127.0.0.1:5000_
 _Press CTRL+C to quit_
 
 ## Request Data from Microservice 
-To request data from the microservice, send a POST request to the `send-email` route of the host and port that the service is running on (default = http://localhost:5000/send-email). Send the following JSON fields in the post request:
+To request data from the microservice, send a POST request to `http://localhost:5000/send-email` that contains the following parameters in JSON format:
 
 #### Sender Parameters
-* `mail_server` - Mail server of your email client. Example: `"smtp.gmail.com"`.
-* `mail_port` - Port that your mail server uses. Example: `"587"' (commonly used port that gmail, Microsoft 365, and other mail servers use) 
-* `mail_username` - Email address you want to use to send emails. Example: `"myfirstname.mylastname@gmail.com`
-* `mail_password` - Password for your email address. If you have 2-factor authentication setup on your email, you might need to use an app password instead of your regular password. The instructions for setting up an app password vary by mail server. For example, to setup a mail client on Google:
+* `mail_server` - Hostname of your outgoing email server. Example: `"smtp.gmail.com"`.
+* `mail_port` - Port that your email server uses. Example: `"587"` (port that Gmail and other SMTP email servers use) 
+* `mail_username` - Email address you want to use to send emails. Example: `"myfirstname.mylastname@gmail.com"`
+* `mail_password` - Email password. If your email account uses 2-factor authentication, you might need to use an app password instead of your regular password. The instructions for setting up an app password vary by email server. For example, to create an app password for Gmail:
     1.	Sign in to your [Google Account](https://myaccount.google.com/).
     2.	Search for `"app password"` and select the **App passwords** result.
     3.	Enter the name of your app and click **Create**.
     4.	Copy the app password to your clipboard and click **Done**.
-    5.	Paste the app password into this field.
+    5.	Paste the app password into the `mail_password` parameter.
 
 #### Email Parameters
-* `recipients` - List of email addresses you want to send the email to. Example: `["recipient1@yahoo.com", "recipient2@gmail.com"]'
+* `recipients` - List of email addresses you want to send the email to. Example: `["recipient1@yahoo.com", "recipient2@gmail.com"]`
 * `subject` - Subject line of email. Example: `"Example subject line"`
-* `body` - Message body of email. If `html` is set to 'True', then the email accepts HTML tags. Example: `"Example message body"`.
+* `body` - Message body of email. If `html` is set to `true`, then you can use HTML tags in the message body. Example: `"Example message body"`
 
 #### Optional Parameters
-* `html` - Format message body using email tag, specified as `true` or `false`. The default is `false` (send emails as plain text).
-* `attachements` - List of files to attach to the email. Specify the full path to each attachment. If you omit this field, then the email includes no attachments. Example: `["file1.txt","img/file2.png"]`
+* `html` - Format the message body using HTML tagging, specified as `true` or `false`. The default is `false` (send emails as plain text).
+* `attachements` - List of files to attach to the email. Specify the full path to each file. If you omit this parameter, then the email includes no attachments. Example: `["file1.txt","img/file2.png"]`
 
 ### Sample Python Client
-This sample client assumes that the email sender is already running.
+Use this sample client to understand how to integrate the email sender microservice into a Python application. This sample client assumes that the email sender microservice is already running.
 
-1. Download the `test-client.py` and `.env` files from this repo.
-2. Install the required dependencies.
+1. Download `test-client.py` from this repo.
+2. Install the required dependencies for the client.
 ```
     pip install dotenv
     pip install requests
 ```
-3. In the `.env` file, set the `SERVER`, `PORT`, `USERNAME`, and `PASSWORD` environment variables. These correspond to the [Sender Parameters](#sender-parameters).
+3. In the same folder as `test-client.py`, create a `.env` file with the structure below. Update the `SERVER`, `PORT`, `USERNAME`, and `PASSWORD` environment variables. These variables correspond to the [Sender Parameters](#sender-parameters).
 > **_SECURITY CONSIDERATIONS:_** DO NOT commit this file to any public repos. Store this file locally to keep your email credentials private.
+```
+SERVER='<mail server, such as smtp.gmail.com>'
+PORT='<mail port, such as 587>'
+USERNAME='<email username>'
+PASSWORD='<email password or app password>'
+```
 
-4. In the `test-client.py` file, set the [Sender Parameters](#sender-parameters) and [Optional Parameters](#optional-parameters).
+4. In `test-client.py`, set the [Sender Parameters](#sender-parameters) and [Optional Parameters](#optional-parameters).
 
 5. Run `test-client.py`. For example:
 ```
@@ -72,7 +88,7 @@ python3 test-client.py
 ```
 
 ### Sample curl Client
-If you have `curl` installed, you can send emails by running a `curl` command like the following. Customize the fields below to suit your application.
+If you have `curl` installed, you can send emails by running a `curl` command similar to the following. Customize the parameters for your application.
 ```
 curl -X POST -H "Content-Type: application/json" -d '{
 "mail_server": "smtp.gmail.com",
