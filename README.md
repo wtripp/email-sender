@@ -112,5 +112,5 @@ If this email failed to send, the microservice sends the error that triggered th
 ```
 {'message': 'Missing required parameters: subject, body', 'success': False}
 ```
-### UML Sequence Diagram
+## UML Sequence Diagram
 ![UML sequence diagram of the Email Sender microservice](https://github.com/wtripp/email-sender/blob/master/email-sender-uml.png)
