@@ -6,75 +6,75 @@ app = Flask(__name__)
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
+    """Send an email message using sender and email data received from the client."""
 
-    # Get data from client
     data = request.get_json()
-
-    # Validate required parameters
-    required_params = ['mail_server','mail_port','mail_username','mail_password',
-                'subject','recipients','body']
-    missing_params = [param for param in required_params if param not in data]
-    if missing_params:
-        return jsonify(
-            {'success': False,
-             'message': f'Missing required parameters: {", ".join(missing_params)}'})
-
-    # Set required parameters
-    server = data.get('mail_server')
-    port = data.get('mail_port')
-    username = data.get('mail_username')
-    password = data.get('mail_password')
-    subject = data.get('subject')
-    recipients = data.get('recipients')
-    body = data.get('body')
-
-    # Set optional parameters
-    attachments = data.get('attachments')
-    html = data.get('html')
+    missing = has_required_params(data)
+    if missing:
+        return jsonify({'success':False, 'message':f'Missing required parameters: {missing}'})
 
     try:
+        sender = create_sender(data)
+        message = create_message(data)
+        sender.send(message)
+        return jsonify({'success':True, 'message':'Email sent successfully.'})
+    except Exception as error:
+        return jsonify({'success':False, 'message':f'Error: {error}'})
 
-        # Configure mail sender
-        app.config['MAIL_SERVER'] = server
-        app.config['MAIL_PORT'] = port
-        app.config['MAIL_USERNAME'] = username
-        app.config['MAIL_PASSWORD'] = password
-        app.config['MAIL_USE_TLS'] = True
-        app.config['MAIL_USE_SSL'] = False
-        mail = Mail(app)
 
-        # Format message
-        msg = Message(
-            sender=username,
-            subject=subject,
-            recipients=recipients
-        )
-        if html:
-            msg.html = body
-        else:
-            msg.body = body
+def has_required_params(data):
+    """Validate that the data received from the client has all required parameters."""
 
-        # Add attachments
-        if attachments:
-            for attachment in attachments:
-                with app.open_resource(attachment) as file:
-                    _, ext = os.path.splitext(attachment)
-                    msg.attach(attachment, f"application/{ext}", file.read())
+    required_params = ['mail_server','mail_port','mail_username','mail_password',
+                       'subject','recipients','body']
+    missing_params = [param for param in required_params if param not in data]
 
-        # Send message
-        mail.send(msg)
-        return jsonify(
-            {
-             'success': True,
-             'message': 'Email sent successfully.'}
-            )
+    # If any parameters are missing, return them as a comma-separated list.
+    if missing_params:
+        return ", ".join(missing_params)
 
-    except Exception as e:
-        return jsonify(
-            {
-             'success': False,
-             'message': f'Error: {e}'}
-            )
+
+def create_sender(data):
+    """Create the email sender using data received from the client."""
+
+    app.config['MAIL_SERVER'] = data.get('mail_server')
+    app.config['MAIL_PORT'] = data.get('mail_port')
+    app.config['MAIL_USERNAME'] = data.get('mail_username')
+    app.config['MAIL_PASSWORD'] = data.get('mail_password')
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+
+    sender = Mail(app)
+    return sender
+
+
+def create_message(data):
+    """Create the email message using data received from the client."""
+
+    message = Message(sender=data.get('mail_username'),
+                      subject=data.get('subject'),
+                      recipients=data.get('recipients'))
+
+    if data.get('html'):
+        message.html = data.get('body')
+    else:
+        message.body = data.get('body')
+    
+    attachments = data.get('attachments')
+    if attachments:
+        message = add_attachments(attachments, message)
+
+    return message
+
+
+def add_attachments(attachments, message):
+    """Add attachments to the message."""
+
+    for attachment in attachments:
+        with app.open_resource(attachment) as file:
+            _, ext = os.path.splitext(attachment)
+            message.attach(attachment, f"application/{ext}", file.read())
+    return message
 
 
 if __name__ == '__main__':
