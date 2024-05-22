@@ -68,7 +68,7 @@ Use this sample client to understand how to integrate the email sender microserv
 1. Download `test-client.py` from this repo.
 2. Install the required dependencies for the client.
 ```
-    pip install dotenv
+    pip install python-dotenv
     pip install requests
 ```
 3. In the same folder as `test-client.py`, create a `.env` file with the structure below. Update the `SERVER`, `PORT`, `USERNAME`, and `PASSWORD` environment variables. These variables correspond to the [Sender Parameters](#sender-parameters).
